@@ -1,0 +1,80 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  6.0                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     interFoam;
+
+startFrom       latestTime;		//simulation continues from the last time step
+
+startTime       0;
+
+stopAt          endTime;		// CHANGE endTime TO writeNow TO STOP IMMEDIATELY
+
+endTime         0.1;			//stop after endTime s - adjustableRunTime
+
+deltaT          1E-10;			//initial time step size
+
+writeControl    adjustableRunTime;	//automatically adjust time step according to CFL
+
+writeInterval   0.01;			//write out every writeInterval s
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression uncompressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;			//adjustableRunTime can modifiy the time step size
+
+adjustTimeStep  yes;			//adjustableRunTime can modifiy the time step size
+
+//Co = U*dt/dx
+//U is defined by the flow
+//dx is defined by the cell size i.e. the mesh
+//Co should be below or equal to 1
+//dt is the only value, which can guarantee this
+//dt is changed in each time step
+
+maxCo           0.2;			//maximum value for Courant number
+maxAlphaCo      0.2;			//maximum value for Courant number of the interface water/air
+
+maxDeltaT       1;			//maximum time step
+
+functions				// volume calculation
+{  
+    waterVolume
+    {
+        type            volFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        log             true;
+        writeControl    writeTime;
+        writeFields     true;
+        regionType      all;
+        operation       volIntegrate;
+        fields
+        (
+            alpha.water
+        );
+    }
+}
+
+// ************************************************************************* //
